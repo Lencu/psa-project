@@ -1,12 +1,13 @@
 import wave
-import pyaudio
 from array import array
+
+import pyaudio
 
 chunk = 1024
 FORMAT = pyaudio.paInt16
 CHANNELS = 1
 RATE = 44100
-RECORD_SECONDS = 10
+RECORD_SECONDS = 5
 FILE_NAME = "RECORDING.wav"
 
 p = pyaudio.PyAudio()
@@ -46,3 +47,24 @@ wavfile.setsampwidth(p.get_sample_size(FORMAT))
 wavfile.setframerate(RATE)
 wavfile.writeframes(b''.join(frames))                    # append frames recorded to file
 wavfile.close()
+
+
+def play():
+    pa = pyaudio.PyAudio()
+    f = wave.open(r"RECORDING.wav", "rb")
+    rstream = pa.open(format=pa.get_format_from_width(f.getsampwidth()),
+                      channels=f.getnchannels(),
+                      rate=f.getframerate(),
+                      output=True)
+    rdata = f.readframes(chunk)
+
+    while rdata:
+        rstream.write(rdata)
+        rdata = f.readframes(chunk)
+
+    rstream.stop_stream()
+    rstream.close()
+    pa.terminate()
+
+
+play()
